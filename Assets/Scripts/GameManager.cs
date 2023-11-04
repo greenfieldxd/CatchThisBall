@@ -67,6 +67,7 @@ public class GameManager : MonoBehaviour
         if (_player._totalHits > YandexGame.savesData.bestScore)
         {
             YandexGame.savesData.bestScore = _player._totalHits;
+            YandexGame.NewLeaderboardScores("leader", YandexGame.savesData.bestScore);
             _screen.BestScoreText.text = YandexGame.savesData.bestScore.ToString();
             YandexGame.SaveProgress();
         }
