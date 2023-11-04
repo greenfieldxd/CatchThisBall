@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,18 +24,19 @@ public class Ball : MonoBehaviour
     [SerializeField] private AudioClip _dieSound;
     [SerializeField] private Animation _textAnimation;
     [SerializeField] private Animation _flashAnimation;
-    [SerializeField] private Text _textScore;
+    [SerializeField] private TextMeshProUGUI _textScore;
 
     private CircleCollider2D _collider;
     private Player _player;
     private Tween _tween;
+    private bool _isStarted = false;
+
+    public event Action OnBallDie; 
     
     private void Start()
     {
         _player = FindObjectOfType<Player>();
         _collider = GetComponent<CircleCollider2D>();
-
-        StartAnimation();
     }
 
     private void OnTriggerEnter2D(Collider2D col)
@@ -56,6 +58,11 @@ public class Ball : MonoBehaviour
         }
     }
 
+    public void StartBall()
+    {
+        StartAnimation();
+    }
+
     private void HitEffect()
     {
         _player.AppendHit();
@@ -69,9 +76,11 @@ public class Ball : MonoBehaviour
 
     private void Die()
     {
+        OnBallDie?.Invoke();
+        _isStarted = false;
+        
         transform.DOMove(Vector3.zero, 1f).SetEase(Ease.InSine).OnComplete(() =>
         {
-            StartAnimation();
             _player.ResetHits();
             _textScore.text = _player._totalHits.ToString();
 
@@ -83,6 +92,8 @@ public class Ball : MonoBehaviour
 
     private void StartAnimation()
     {
+        _isStarted = true;
+        
         Sequence startAnim = DOTween.Sequence();
 
         startAnim.Append(transform.DOScale(Vector3.one * 0.5f, 0.5f).SetEase(Ease.InSine));
