@@ -52,8 +52,6 @@ public class Ball : MonoBehaviour
         {
             _collider.enabled = false;
             _tween.Kill();
-
-            _textScore.text = "You Lose!";
             Die();
         }
     }
@@ -81,9 +79,6 @@ public class Ball : MonoBehaviour
         
         transform.DOMove(Vector3.zero, 1f).SetEase(Ease.InSine).OnComplete(() =>
         {
-            _player.ResetHits();
-            _textScore.text = _player._totalHits.ToString();
-
             _audio.pitch = 2.5f;
             _audio.PlayOneShot(_dieSound);
         });
@@ -93,7 +88,8 @@ public class Ball : MonoBehaviour
     private void StartAnimation()
     {
         _isStarted = true;
-        
+        _textScore.text = _player._totalHits.ToString();
+
         Sequence startAnim = DOTween.Sequence();
 
         startAnim.Append(transform.DOScale(Vector3.one * 0.5f, 0.5f).SetEase(Ease.InSine));

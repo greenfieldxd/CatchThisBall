@@ -1,4 +1,6 @@
 ﻿
+using Source.Scripts.Extensions;
+
 namespace YG
 {
     [System.Serializable]
@@ -20,6 +22,7 @@ namespace YG
 
         public bool isSound = true;
         public int bestScore;
+        public ColorType colorType = ColorType.Orange;
 
         // Поля (сохранения) можно удалять и создавать новые. При обновлении игры сохранения ломаться не должны
 

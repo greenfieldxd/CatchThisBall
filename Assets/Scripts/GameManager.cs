@@ -1,13 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Source.Scripts.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 using YG;
+using Random = System.Random;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private MeshRenderer[] meshRenderers;
+    [SerializeField] private Terrain[] terrains;
+    [SerializeField] private ParticleSystem effect;
+    [SerializeField] private ParticleSystem effectBig;
+    [SerializeField] private GameColor[] gameColors;
+    [SerializeField] private Camera cam;
+    
     private Ball _ball;
     private Player _player;
     private UIScreen _screen;
@@ -23,14 +33,14 @@ public class GameManager : MonoBehaviour
         _audios = FindObjectsOfType<AudioSource>();
         _yandexGame = FindObjectOfType<YandexGame>();_screen = FindObjectOfType<UIScreen>();
         _yandexGame = FindObjectOfType<YandexGame>();
-
-        foreach (var source in _audios) source.volume = YandexGame.savesData.isSound ? 1f : 0f;
-        _screen.SoundTextUpdate();
-
+        
         _screen.StartButton.onClick.AddListener(StartGame);
         _screen.ChangeLanguage.onClick.AddListener(ChangeLanguage);
         _screen.ChangeSound.onClick.AddListener(ChangeSound);
+        _screen.ChangeColor.onClick.AddListener(ClickColorButton);
 
+        YandexGame.GetDataEvent += UpdateData;
+        YandexGame.RewardVideoEvent += ChangeRandomColor;
         _ball.OnBallDie += StopGame;
     }
 
@@ -54,6 +64,15 @@ public class GameManager : MonoBehaviour
         
         _player.ResetPlatform();
 
+        if (_player._totalHits > YandexGame.savesData.bestScore)
+        {
+            YandexGame.savesData.bestScore = _player._totalHits;
+            _screen.BestScoreText.text = YandexGame.savesData.bestScore.ToString();
+            YandexGame.SaveProgress();
+        }
+        
+        _player.ResetHits();
+
         foreach (var hide in _screen.HideGameObjects)
         {
             var button = hide.GetComponent<Button>();
@@ -67,19 +86,94 @@ public class GameManager : MonoBehaviour
 
     private void ChangeLanguage()
     {
-        Debug.Log("Language Click");
         OtherExtensions.TransformPunchScale(_screen.ChangeLanguage.transform);
         _yandexGame.SwitchLanguage();
     }
 
     private void ChangeSound()
     {
-        Debug.Log("Sound Click");
         YandexGame.savesData.isSound = !YandexGame.savesData.isSound;
         
         OtherExtensions.TransformPunchScale(_screen.ChangeSound.transform);
         foreach (var source in _audios) source.volume = YandexGame.savesData.isSound ? 1 : 0;
         _screen.SoundTextUpdate();
         YandexGame.SaveProgress();
+    }
+
+    private void ClickColorButton()
+    {
+        YandexGame.RewVideoShow(0);
+        OtherExtensions.TransformPunchScale(_screen.ChangeColor.transform);
+    }
+
+    private void ChangeRandomColor(int id)
+    {
+        var gameColor = gameColors.First(x => x.type == YandexGame.savesData.colorType);
+        var list = gameColors.Where(x => x != gameColor);
+        
+        Random random = new Random();
+        var newGameColor = list.OrderBy(x => random.Next()).ToArray().First();
+        YandexGame.savesData.colorType = newGameColor.type;
+        YandexGame.SaveProgress();
+
+        cam.backgroundColor = newGameColor.camColor;
+        
+        ParticleSystem.MainModule main1 = effect.main;
+        main1.startColor = gameColor.effectColor; 
+        
+        ParticleSystem.MainModule main2 = effectBig.main;
+        main2.startColor = gameColor.bigEffectColor; 
+        
+        foreach (var terrain in terrains)
+        {
+            terrain.materialTemplate = newGameColor.mat;
+        }
+
+        foreach (var mesh in meshRenderers)
+        {
+            mesh.material = newGameColor.mat;
+        }
+    }
+
+    private void LoadGameColor()
+    {
+        var gameColor = gameColors.First(x => x.type == YandexGame.savesData.colorType);
+        
+        cam.backgroundColor = gameColor.camColor;
+
+        ParticleSystem.MainModule main1 = effect.main;
+        main1.startColor = gameColor.effectColor; 
+        
+        ParticleSystem.MainModule main2 = effectBig.main;
+        main2.startColor = gameColor.bigEffectColor; 
+        
+        foreach (var terrain in terrains)
+        {
+            terrain.materialTemplate = gameColor.mat;
+        }
+
+        foreach (var mesh in meshRenderers)
+        {
+            mesh.material = gameColor.mat;
+        }
+    }
+    
+
+    private void UpdateData()
+    {
+        LoadGameColor();
+        foreach (var source in _audios) source.volume = YandexGame.savesData.isSound ? 1f : 0f;
+        _screen.SoundTextUpdate();
+        _screen.BestScoreText.text = YandexGame.savesData.bestScore.ToString();
+    }
+
+    [Serializable]
+    public class GameColor
+    {
+        public ColorType type;
+        public Material mat;
+        public Color effectColor;
+        public Color bigEffectColor;
+        public Color camColor;
     }
 }

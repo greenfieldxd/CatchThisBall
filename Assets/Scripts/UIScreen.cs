@@ -10,6 +10,7 @@ public class UIScreen : MonoBehaviour
     [field:SerializeField] public Button ChangeSound { get; private set; }
     [field:SerializeField] public Button ChangeLanguage { get; private set; }
     [field:SerializeField] public TextMeshProUGUI ScoreText { get; private set; }
+    [field:SerializeField] public TextMeshProUGUI BestScoreText { get; private set; }
     [field:SerializeField] public GameObject SoundOn { get; private set; }
     [field:SerializeField] public GameObject SoundOff { get; private set; }
     [field:SerializeField] public GameObject[] HideGameObjects { get; private set; }
