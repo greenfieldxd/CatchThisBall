@@ -1,16 +1,16 @@
 {
-    "idSave": 160,
-    "isFirstSession": false,
-    "language": "en",
-    "promptDone": false,
-    "money": 1,
-    "newPlayerName": "Hello!",
-    "openLevels": [
-        false,
-        true,
-        false
-    ],
-    "isSound": false,
-    "bestScore": 26,
-    "colorType": 3
+  "idSave": 192,
+  "isFirstSession": false,
+  "language": "en",
+  "promptDone": false,
+  "money": 1,
+  "newPlayerName": "Hello!",
+  "openLevels": [
+    false,
+    true,
+    false
+  ],
+  "isSound": false,
+  "bestScore": 46,
+  "colorType": 2
 }
